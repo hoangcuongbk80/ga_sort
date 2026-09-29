@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- hybridsort =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=hybridsort | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   90.0%  69.7%  30.3%  0.832   69.0%
+partial    0.3-0.7      248   25.4%  14.9%   0.8%  0.765   20.6%
+heavy      0.1-0.3      147    0.0%   0.0%   0.0%    nan    0.0%
+total      <0.10        455    0.0%   0.0%   0.0%    nan    0.0%
+----------------------------------------------------------------
+all-burn   <0.70        850    7.4%   4.4%   0.2%  0.765    6.0%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 7
+  fragmentation (Frag)    : 31   (track interruptions during burn)
+  ID turned off (track gone): 796 frames (93.6% of burn)
+  ID survived to burn end : 8/30 episodes (26.7%)

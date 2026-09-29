@@ -1,0 +1,21 @@
+Table (tab:emitlever) source data, generated from the deployed checkpoint
+(weights/detector/best.pt + weights/hpsi/h_psi_head.pt), reproducible via:
+  reproduce/run_synth_and_recovery_g80.sh
+  reproduce/run_recovery_g12_deployed.sh
+  python scripts/exp_reviewer/score_precision.py --trackers glaretrack_rcv_g12 glaretrack_rcv_g80
+
+=== MOTA / FP (full-scene synth MOT, every person scored) ===
+--- G=80 benchmark: results/eval_synth/benchmark_glaretrack_synthmot_g80_test.txt ---
+COMBINED   HOTA=59.18  DetA=56.04  AssA=63.39  IDF1=73.39  MOTA=60.55  IDSW=16  FP=4261  FN=2236
+
+--- G=12 deployed: results/eval_synth/benchmark_glaretrack_synthmot_g12_test.txt ---
+COMBINED   HOTA=61.22  DetA=59.69  AssA=63.69  IDF1=76.90  MOTA=72.03  IDSW=14  FP=1787  FN=2817
+
+=== Rcv@.5 / HeldPrec (burnt-target-only recovery scoring) ===
+tracker              Rcv@.5  heavy  total  ID-Rcv  HeldPrec  Rcv-F1  ghost%
+glaretrack_rcv_g12    35.8%  40.1%  30.1%   34.0%    94.4%    51.9    5.6%
+glaretrack_rcv_g80    71.2%  70.1%  72.5%   68.4%    78.6%    74.7   21.4%
+
+=== tab:emitlever rows reproduced ===
+GlareTrack (G=80, benchmark) : Rcv@.5=71.2  HeldPrec=78.6  MOTA=60.6  FP=4,261
+GlareTrack (G=12, deployed)  : Rcv@.5=35.8  HeldPrec=94.4  MOTA=72.0  FP=1,787

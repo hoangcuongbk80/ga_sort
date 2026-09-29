@@ -1,0 +1,10 @@
+FastReID appearance degeneracy on GlareMOT (identical-PPE miners) -- CLEAR crops only
+model: FastReID SBS-S50 fine-tuned on GlareMOT (init mot17_sbs_S50), cfg GlareMOT/sbs_S50.yml, weights reid_finetune/model_final.pth, 2048-d L2-normalized
+crops: 685 clear GT person crops (no glare blob, mid-exposed, h>=80px), 19 seqs
+
+comparison                         n    mean    std
+within identity                30000   0.361  0.300
+between (same frame)             483   0.415  0.185
+between (any)                  30000   0.087  0.200
+
+discrimination margin (within - between same-frame) = -0.054

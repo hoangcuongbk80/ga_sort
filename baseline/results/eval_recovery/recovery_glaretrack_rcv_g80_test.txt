@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- glaretrack_rcv_g80 =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=glaretrack_rcv_g80 | IoU>0.5 | max_gap=80
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   94.1%  70.5%  30.7%  0.824   89.1%
+partial    0.3-0.7      248   69.4%  34.3%   4.8%  0.736   65.7%
+heavy      0.1-0.3      147   70.1%  34.0%   2.7%  0.725   68.0%
+total      <0.10        455   72.5%  36.5%   4.8%  0.734   69.9%
+----------------------------------------------------------------
+all-burn   <0.70        850   71.2%  35.4%   4.5%  0.733   68.4%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 2
+  fragmentation (Frag)    : 17   (track interruptions during burn)
+  ID turned off (track gone): 111 frames (13.1% of burn)
+  ID survived to burn end : 15/30 episodes (50.0%)

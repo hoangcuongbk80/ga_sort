@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- glaretrack_nooverlap_rcv_g80 =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=glaretrack_nooverlap_rcv_g80 | IoU>0.5 | max_gap=80
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   94.9%  71.0%  30.8%  0.823   86.6%
+partial    0.3-0.7      248   70.6%  34.7%   4.8%  0.737   63.3%
+heavy      0.1-0.3      147   72.1%  36.1%   2.7%  0.728   66.7%
+total      <0.10        455   74.9%  38.0%   4.8%  0.736   69.7%
+----------------------------------------------------------------
+all-burn   <0.70        850   73.2%  36.7%   4.5%  0.735   67.3%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 3
+  fragmentation (Frag)    : 16   (track interruptions during burn)
+  ID turned off (track gone): 124 frames (14.6% of burn)
+  ID survived to burn end : 15/30 episodes (50.0%)

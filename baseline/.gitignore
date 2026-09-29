@@ -1,0 +1,43 @@
+# ---- Datasets (external; pointed to by configs/paths.yaml) ----
+/datasets/
+# Datasets live outside the repo at D:/datasets/GlareMOT, GlareMOT-Synth, etc.
+
+# ---- Model weights ----
+# The two shipped weights (detector best.pt + h_psi head) ARE committed under
+# weights/. Only the auto-downloaded pretrained YOLO backbone is ignored.
+weights/pretrained/
+*.onnx
+
+# ---- Generated outputs ----
+cache/
+# Keep the curated paper reports under results/ but ignore bulky regenerated artifacts:
+results/**/trackers/
+results/**/gt/
+results/**/data/
+results/**/*.mp4
+results/**/logs/
+results/**/_*.log
+*.mp4
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# ---- Tooling / OS ----
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Ultralytics/        # YOLO runtime config dir (machine-local)
+
+# Internal comparison / methodology notes - not part of the public release
+results/COMPARISON_TABLES.md
+results/BASELINES_METHODOLOGY.md

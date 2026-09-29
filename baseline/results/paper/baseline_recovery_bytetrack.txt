@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- bytetrack =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=bytetrack | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   88.5%  68.9%  30.4%  0.832   62.4%
+partial    0.3-0.7      248   29.4%  17.7%   0.8%  0.770   19.8%
+heavy      0.1-0.3      147    0.0%   0.0%   0.0%    nan    0.0%
+total      <0.10        455    0.0%   0.0%   0.0%    nan    0.0%
+----------------------------------------------------------------
+all-burn   <0.70        850    8.6%   5.2%   0.2%  0.770    5.8%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 11
+  fragmentation (Frag)    : 30   (track interruptions during burn)
+  ID turned off (track gone): 801 frames (94.2% of burn)
+  ID survived to burn end : 9/30 episodes (30.0%)

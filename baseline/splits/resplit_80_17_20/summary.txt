@@ -1,0 +1,21 @@
+dataset_root: D:\datasets\person_tracking_22fps_from_15fps
+total: 117
+
+train: n=80 q=33 non_q=47
+  cam1: n=61 q=28 non_q=33
+  cam2: n=15 q=5 non_q=10
+  cam3: n=4 q=0 non_q=4
+
+val: n=17 q=9 non_q=8
+  cam1: n=13 q=7 non_q=6
+  cam2: n=3 q=2 non_q=1
+  cam3: n=1 q=0 non_q=1
+
+test: n=20 q=15 non_q=5
+  cam1: n=15 q=10 non_q=5
+  cam2: n=4 q=4 non_q=0
+  cam3: n=1 q=1 non_q=0
+
+mandatory:
+  sequence_77 in train: True
+  ID128 sequence_11q in train: True

@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- dip =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=dip | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   91.7%  70.3%  30.4%  0.829   48.8%
+partial    0.3-0.7      248   29.4%  16.5%   1.2%  0.759    9.3%
+heavy      0.1-0.3      147    1.4%   0.0%   0.0%  0.673    0.0%
+total      <0.10        455    0.0%   0.0%   0.0%    nan    0.0%
+----------------------------------------------------------------
+all-burn   <0.70        850    8.8%   4.8%   0.4%  0.757    2.7%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 24
+  fragmentation (Frag)    : 30   (track interruptions during burn)
+  ID turned off (track gone): 827 frames (97.3% of burn)
+  ID survived to burn end : 3/30 episodes (10.0%)

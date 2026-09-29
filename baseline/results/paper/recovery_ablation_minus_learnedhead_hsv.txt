@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- abl_hsvonly_rcv =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=abl_hsvonly_rcv | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   92.5%  70.6%  30.7%  0.828   87.1%
+partial    0.3-0.7      248   45.6%  28.2%   3.6%  0.776   41.9%
+heavy      0.1-0.3      147   44.2%  23.1%   2.0%  0.757   42.2%
+total      <0.10        455   52.7%  30.3%   4.6%  0.758   51.0%
+----------------------------------------------------------------
+all-burn   <0.70        850   49.2%  28.5%   3.9%  0.763   46.8%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 2
+  fragmentation (Frag)    : 30   (track interruptions during burn)
+  ID turned off (track gone): 421 frames (49.5% of burn)
+  ID survived to burn end : 2/30 episodes (6.7%)

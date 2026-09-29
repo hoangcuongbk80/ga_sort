@@ -1,0 +1,18 @@
+
+===== GLARE RECOVERY -- botsort =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=botsort | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   88.8%  69.3%  30.9%  0.833   62.5%
+partial    0.3-0.7      248   31.0%  18.5%   1.2%  0.771   19.8%
+heavy      0.1-0.3      147    0.0%   0.0%   0.0%    nan    0.0%
+total      <0.10        455    0.0%   0.0%   0.0%    nan    0.0%
+----------------------------------------------------------------
+all-burn   <0.70        850    9.1%   5.4%   0.4%  0.771    5.8%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 11
+  fragmentation (Frag)    : 30   (track interruptions during burn)
+  ID turned off (track gone): 801 frames (94.2% of burn)
+  ID survived to burn end : 9/30 episodes (30.0%)

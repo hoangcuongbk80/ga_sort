@@ -1,0 +1,35 @@
+
+===== GLARE RECOVERY -- deepocsort_synth =====
+seqs w/ glare: 15 | events: 30 | burnt targets: 21 | burn instances: 850 | clear-ref: 9570
+tracker=deepocsort_synth | IoU>0.5 | imle=official
+bucket     m_glare        n  Rcv@.5   @.75    @.9   mIoU  ID-Rcv
+----------------------------------------------------------------
+clear-ref  >=0.90      9570   90.8%  70.1%  30.8%  0.831   66.3%
+partial    0.3-0.7      248   27.0%  14.9%   1.6%  0.756   17.3%
+heavy      0.1-0.3      147    0.0%   0.0%   0.0%    nan    0.0%
+total      <0.10        455    0.0%   0.0%   0.0%    nan    0.0%
+----------------------------------------------------------------
+all-burn   <0.70        850    7.9%   4.4%   0.5%  0.756    5.1%
+----------------------------------------------------------------
+ID continuity over 30 burnt episodes (850 burn frames):
+  ID switches (IDSW)      : 11
+  fragmentation (Frag)    : 31   (track interruptions during burn)
+  ID turned off (track gone): 805 frames (94.7% of burn)
+  ID survived to burn end : 8/30 episodes (26.7%)
+
+----- per sequence (all-burn Rcv@.5 mIoU ID-Rcv / clear | IDSW Frag ID-off Surv) -----
+136_sequence_2q                burn=   19 Rcv= 10.5% mIoU=0.66 ID= 10.5% clear= 58.5% | IDSW=  0 Frag=  1 off=  17 surv=1/1
+129_sequence_13q          burn=   26 Rcv=  7.7% mIoU=0.74 ID=  7.7% clear= 88.6% | IDSW=  0 Frag=  1 off=  24 surv=1/1
+135_sequence_19q               burn=   63 Rcv=  3.2% mIoU=0.80 ID=  3.2% clear= 97.8% | IDSW=  0 Frag=  2 off=  61 surv=0/2
+145_sequence_28q               burn=   70 Rcv= 14.3% mIoU=0.80 ID= 14.3% clear= 97.9% | IDSW=  0 Frag=  3 off=  60 surv=1/3
+160_sequence_41q               burn=   28 Rcv= 10.7% mIoU=0.86 ID= 10.7% clear= 98.8% | IDSW=  0 Frag=  1 off=  25 surv=1/1
+176_sequence_56q               burn=   68 Rcv=  8.8% mIoU=0.67 ID=  0.0% clear= 91.8% | IDSW=  4 Frag=  4 off=  68 surv=0/3
+183_sequence_62q               burn=   79 Rcv= 15.2% mIoU=0.80 ID=  2.5% clear= 95.8% | IDSW=  2 Frag=  3 off=  77 surv=0/3
+192_sequence_70q          burn=   84 Rcv=  9.5% mIoU=0.76 ID=  7.1% clear= 98.2% | IDSW=  1 Frag=  3 off=  78 surv=1/3
+204_sequence_81q          burn=  115 Rcv=  9.6% mIoU=0.71 ID=  5.2% clear= 89.9% | IDSW=  3 Frag=  3 off= 107 surv=1/3
+211_sequence_88q               burn=   61 Rcv=  8.2% mIoU=0.85 ID=  6.6% clear= 91.7% | IDSW=  1 Frag=  2 off=  57 surv=1/2
+325_sequence_92q               burn=   63 Rcv=  0.0% mIoU= nan ID=  0.0% clear= 54.8% | IDSW=  0 Frag=  2 off=  63 surv=0/2
+305_sequence_103q              burn=   50 Rcv=  4.0% mIoU=0.71 ID=  4.0% clear= 71.6% | IDSW=  0 Frag=  2 off=  48 surv=0/2
+312_sequence_108q              burn=   43 Rcv=  0.0% mIoU= nan ID=  0.0% clear= 65.3% | IDSW=  0 Frag=  1 off=  43 surv=0/1
+316_sequence_112q              burn=   35 Rcv= 11.4% mIoU=0.63 ID= 11.4% clear=100.0% | IDSW=  0 Frag=  1 off=  31 surv=1/1
+320_sequence_116q              burn=   46 Rcv=  0.0% mIoU= nan ID=  0.0% clear= 89.2% | IDSW=  0 Frag=  2 off=  46 surv=0/2

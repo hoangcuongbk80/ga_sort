@@ -1,0 +1,31 @@
+# GlareTrack paths. Relative paths resolve to the repo root (this folder);
+# absolute paths (the datasets) point at where the data lives on disk.
+# EDIT the data.* paths below to where you unpacked the GlareMOT datasets,
+# or keep this file untouched and point GLAREMOT_CONFIG at your own copy.
+data:
+  tracking:  /path/to/GlareMOT          # real held-out MOT footage (test/val/train)
+  glare:     /path/to/GlareMOT-Synth    # synthetic glare-burn twins (recovery benchmark)
+  occlusion: /path/to/GlareMOT          # same real footage; used by the occlusion-graph tooling
+  videos:    /path/to/videos            # optional: raw clips for scripts/08 visualisation
+  detector:  /path/to/GlareMOT-Det      # detector TRAINING set; only needed to retrain YOLO
+
+imgsz: 1536
+
+weights:
+  pretrained_yolo: weights/pretrained/yolo11m.pt   # auto-downloaded by ultralytics if absent
+  detector: weights/detector/best.pt               # YOLO11m@1536, conf 0.25 (shipped in-repo)
+  hpsi:     weights/hpsi/h_psi_head.pt              # glare visibility head h_psi (shipped in-repo)
+
+cache_dir: cache
+results_dir: results
+
+train:
+  detector:
+    epochs: 180
+    patience: 30
+    batch: 4
+    workers: 4
+  hpsi:
+    epochs: 100
+    frame_stride: 5
+    glare_mix: 0.0       # official: h_psi trained on real glare only (rebalanced hard-neg)

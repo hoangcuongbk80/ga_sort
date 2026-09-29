@@ -1,0 +1,8 @@
+HeadlampMOT— Dataset Download
+================================
+
+The HeadlampMOT benchmark (all sequences, ~80 GB) is hosted anonymously at:
+
+    https://drive.google.com/file/d/1LEHAvE7r85UsUUdZcDeRONabZSUwxIt-/view?usp=sharing
+
+    File: GlareMOT_full.zip
