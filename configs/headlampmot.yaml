@@ -1,0 +1,28 @@
+photometry:
+  value_threshold: 0.90
+  saturation_threshold: 0.25
+  minimum_component_area: 16
+  boundary_band_fraction: 0.10
+  radial_bins: 4
+
+motion:
+  position_acceleration_fraction: 0.02
+  log_scale_acceleration: 0.10
+  birth_position_std_fraction: 0.02
+  birth_log_scale_std: 0.05
+  birth_velocity_std_fraction: 0.05
+  birth_log_scale_velocity_std: 0.20
+  maximum_timestamp_gap: 2.0
+
+tracking:
+  gate_probability: 0.995
+  survival_probability: 0.995
+  reference_frame_interval: 0.04
+  report_threshold: 0.85
+  delete_threshold: 0.05
+  probability_clip: [0.01, 0.99]
+  confidence_clip: [0.0001, 0.9999]
+  density_floor: 1.0e-12
+  logarithm_floor: 1.0e-12
+  recent_detection_window: 10
+
