@@ -1,7 +1,13 @@
 # Degradation-conditioned probabilistic tracker
 
-This directory contains a reference implementation of the method described in
-`latex/Method.tex`. The implementation uses the measurement representation
+This repository provides a Python implementation of degradation-conditioned
+multi-object tracking under photometric saturation. The tracker estimates the
+probability of detection, systematic bounding-box bias, and heteroscedastic
+measurement covariance from each predicted target region. These quantities are
+used consistently in likelihood-based data association, Kalman correction, and
+probabilistic track management.
+
+The implementation uses the measurement representation
 
 ```text
 z = [center_x, center_y, log(width), log(height)]
@@ -25,7 +31,7 @@ public API use `xyxy` coordinates with an exclusive lower-right boundary.
 
 ## Installation
 
-Use Python 3.10, matching the experimental environment in the manuscript.
+Python 3.10 is recommended for the provided dependency versions.
 
 ```bash
 python -m venv .venv
@@ -40,6 +46,7 @@ pytest
 from degradation_mot.config import TrackerConfig
 from degradation_mot.models.observation import ConstantObservationModel
 from degradation_mot.tracking.tracker import DegradationConditionedTracker
+from degradation_mot.types import Detection
 
 tracker = DegradationConditionedTracker(
     config=TrackerConfig(),
@@ -58,7 +65,7 @@ trained `TorchObservationModel` should be used for reported experiments.
 `scripts/run_tracker.py` accepts one JSON object per frame:
 
 ```json
-{"image":"D:/dataset/seq/img/000001.jpg","timestamp":0.0,"detections":[{"xyxy":[120,80,190,260],"confidence":0.83,"category":0}]}
+{"image":"data/sequence/images/000001.jpg","timestamp":0.0,"detections":[{"xyxy":[120,80,190,260],"confidence":0.83,"category":0}]}
 ```
 
 Run the constant-model integration version with:
