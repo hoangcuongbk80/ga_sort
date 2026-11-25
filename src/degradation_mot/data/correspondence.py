@@ -28,6 +28,7 @@ def match_detections_to_annotations(
     annotations: list[Annotation],
     detections: list[Detection],
     alternative_cost_margin: float = 0.15,
+    confidence_threshold: float = 0.10,
 ) -> CorrespondenceResult:
     """Apply the permissive calibration gate and matching from the supplement.
 
@@ -39,10 +40,13 @@ def match_detections_to_annotations(
     except ImportError as exc:
         raise ImportError("SciPy is required for calibration matching") from exc
 
+    retained_indices = tuple(index for index, detection in enumerate(detections)
+                             if confidence_threshold <= detection.confidence < 1.0)
+    detections = [detections[index] for index in retained_indices]
     annotation_count = len(annotations)
     detection_count = len(detections)
     if annotation_count == 0:
-        return CorrespondenceResult((), (), tuple(range(detection_count)), ())
+        return CorrespondenceResult((), (), retained_indices, ())
     if detection_count == 0:
         return CorrespondenceResult((), tuple(range(annotation_count)), (), ())
 
@@ -143,5 +147,10 @@ def match_detections_to_annotations(
         for index in range(detection_count)
         if index not in used_detections and index not in ambiguous_detections
     )
-    return CorrespondenceResult(tuple(matches), missed, clutter, tuple(ambiguous))
+    return CorrespondenceResult(
+        tuple((target, retained_indices[detection]) for target, detection in matches),
+        missed,
+        tuple(retained_indices[index] for index in clutter),
+        tuple((target, retained_indices[detection]) for target, detection in ambiguous),
+    )
 

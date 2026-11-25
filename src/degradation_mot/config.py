@@ -37,6 +37,11 @@ class TrackingConfig:
     density_floor: float = 1.0e-12
     logarithm_floor: float = 1.0e-12
     recent_detection_window: int = 10
+    confidence_threshold: float = 0.10
+
+    def __post_init__(self) -> None:
+        if not 0.0 <= self.confidence_threshold < 1.0:
+            raise ValueError("confidence_threshold must lie in [0, 1)")
 
 
 @dataclass(frozen=True)

@@ -26,6 +26,7 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--clutter-density", type=Path)
     parser.add_argument("--birth-density", type=Path)
+    parser.add_argument("--internal-reference", action="store_true")
     parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
@@ -35,6 +36,8 @@ def main() -> None:
         if args.checkpoint
         else ConstantObservationModel()
     )
+    if args.checkpoint and observation_model.confidence_threshold is None:
+        parser.error("retrain the observation checkpoint with a recorded retained-score threshold")
     clutter_density = (
         DiagonalGaussianMixtureDensity.load(args.clutter_density)
         if args.clutter_density
@@ -45,9 +48,12 @@ def main() -> None:
         if args.birth_density
         else None
     )
-    tracker = DegradationConditionedTracker(
-        config, observation_model, clutter_density, birth_density
-    )
+    if args.internal_reference:
+        if clutter_density is None or args.checkpoint or args.birth_density:
+            parser.error("--internal-reference requires a spatial --clutter-density only")
+        tracker = DegradationConditionedTracker.internal_fixed_observation_reference(config, clutter_density)
+    else:
+        tracker = DegradationConditionedTracker(config, observation_model, clutter_density, birth_density)
     rows: list[str] = []
     with args.manifest.open("r", encoding="utf-8") as stream:
         for frame_index, line in enumerate(stream, start=1):

@@ -1,4 +1,4 @@
-"""Step 04 - Synthesize person-person occlusion GT (optional re-run).
+"""Step 04 - Synthesize person-person occlusion GT.
 
 Glare erases a person's OWN pixels; occlusion erases them because a NEARER
 person stands in front. This step composites a donor track over a target track

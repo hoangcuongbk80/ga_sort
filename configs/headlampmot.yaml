@@ -15,6 +15,7 @@ motion:
   maximum_timestamp_gap: 2.0
 
 tracking:
+  confidence_threshold: 0.10
   gate_probability: 0.995
   survival_probability: 0.995
   reference_frame_interval: 0.04

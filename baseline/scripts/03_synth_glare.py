@@ -1,4 +1,4 @@
-"""Step 03 - Synthesize headlamp glare on the q-sequences (optional re-run).
+"""Step 03 - Synthesize headlamp glare on the q-sequences.
 
 Turns a CLEAN tracking sequence into a paired "burnt" sequence: a person's
 headlamp glare rises smoothly (raised-cosine envelope, <= 3 s), holds - fully burning the person, total feature loss - then fades. Rendered in linear

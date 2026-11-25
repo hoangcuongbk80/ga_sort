@@ -6,7 +6,8 @@ from math import exp, lgamma, log, pi
 import numpy as np
 from numpy.typing import NDArray
 
-from ..models.density import MarkedDensity
+from ..models.confidence import beta_log_tail
+from ..models.density import MarkedDensity, marked_log_intensity
 from ..models.observation import ObservationParameters
 from ..types import Detection
 from .kalman import innovation_statistics
@@ -52,6 +53,7 @@ def associate(
     confidence_clip: tuple[float, float],
     density_floor: float,
     logarithm_floor: float,
+    confidence_threshold: float = 0.10,
 ) -> AssociationResult:
     try:
         from scipy.optimize import linear_sum_assignment
@@ -60,20 +62,35 @@ def associate(
 
     track_count = len(track_means)
     detection_count = len(detections)
+    retained = tuple(index for index, detection in enumerate(detections)
+                     if confidence_threshold <= detection.confidence < 1.0)
     if track_count == 0:
-        return AssociationResult((), (), tuple(range(detection_count)))
+        return AssociationResult((), (), retained)
+
+    log_clutter = {
+        index: max(marked_log_intensity(
+            clutter_density, detection_measurements[index], detections[index].confidence,
+            image_size, confidence_clip,
+        ), log(density_floor))
+        for index in retained
+    }
 
     cost = np.full((track_count, detection_count + track_count), np.inf)
     for track_index in range(track_count):
         parameters = observation_parameters[track_index]
-        probability = float(np.clip(parameters.detection_probability, *probability_clip))
+        probability = parameters.detection_probability
+        log_probability = log(float(np.clip(probability, *probability_clip)))
         miss_probability = max(
             1.0 - track_existences[track_index] * probability * gate_probability,
             logarithm_floor,
         )
         cost[track_index, detection_count + track_index] = -log(miss_probability)
 
-        for detection_index, detection in enumerate(detections):
+        log_confidence_tail = beta_log_tail(
+            confidence_threshold, parameters.confidence_alpha, parameters.confidence_beta
+        ) if retained else 0.0
+        for detection_index in retained:
+            detection = detections[detection_index]
             if detection.category != track_categories[track_index]:
                 continue
             measurement = detection_measurements[detection_index]
@@ -96,18 +113,14 @@ def associate(
                 clipped_confidence,
                 parameters.confidence_alpha,
                 parameters.confidence_beta,
-            )
-            log_clutter = clutter_density.log_intensity(
-                measurement, clipped_confidence, image_size
-            )
-            log_clutter = max(log_clutter, log(density_floor))
+            ) - log_confidence_tail
             log_ratio = (
                 log(max(track_existences[track_index], logarithm_floor))
-                + log(probability)
+                + log_probability
                 + log_target
-                - log_clutter
+                - log_clutter[detection_index]
             )
-            cost[track_index, detection_index] = -log_ratio
+            cost[track_index, detection_index] = -max(log_ratio, log(logarithm_floor))
 
     row_indices, column_indices = linear_sum_assignment(cost)
     matches: list[tuple[int, int]] = []
@@ -121,7 +134,7 @@ def associate(
             used_detections.add(column)
         else:
             missed_tracks.append(track_index)
-    unused = tuple(index for index in range(detection_count) if index not in used_detections)
+    unused = tuple(index for index in retained if index not in used_detections)
     return AssociationResult(tuple(matches), tuple(missed_tracks), unused)
 
 

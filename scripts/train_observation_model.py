@@ -13,7 +13,7 @@ from degradation_mot.models.networks import CalibrationNetworks
 from degradation_mot.models.training import calibration_loss
 
 
-def load_samples(path: Path) -> dict[str, np.ndarray]:
+def load_samples(path: Path, threshold: float) -> dict[str, np.ndarray]:
     required = {
         "degradation",
         "baseline",
@@ -26,7 +26,20 @@ def load_samples(path: Path) -> dict[str, np.ndarray]:
         missing = required.difference(archive.files)
         if missing:
             raise ValueError(f"{path} is missing arrays: {sorted(missing)}")
-        return {key: archive[key] for key in required}
+        archive_threshold = float(archive["confidence_threshold"]) if "confidence_threshold" in archive else 0.10
+        if not np.isclose(archive_threshold, threshold, atol=1.0e-8, rtol=0.0):
+            raise ValueError(f"{path} requires labels prepared at threshold {threshold}")
+        samples = {key: archive[key] for key in required}
+    detected = samples["detected"]
+    eligible = samples["localization_eligible"].astype(bool)
+    confidence = samples["confidence"][eligible]
+    if len(detected) == 0 or not np.all(np.isin(detected, [0, 1])):
+        raise ValueError(f"{path} requires nonempty binary detection labels")
+    if not len(confidence) or not np.all(detected[eligible] == 1) or not np.all(
+        (confidence >= threshold) & (confidence < 1.0)
+    ):
+        raise ValueError(f"{path} requires verified retained localization samples")
+    return samples
 
 
 def as_dataset(
@@ -49,10 +62,11 @@ def as_dataset(
 
 
 def evaluate(
-    model: CalibrationNetworks, loader: DataLoader, device: torch.device
+    model: CalibrationNetworks, loader: DataLoader, device: torch.device, threshold: float,
 ) -> dict[str, float]:
-    totals = {"total": 0.0, "detection": 0.0, "localization": 0.0, "confidence": 0.0}
+    totals = {"detection": 0.0, "localization": 0.0, "confidence": 0.0}
     sample_count = 0
+    localization_count = 0
     model.eval()
     with torch.no_grad():
         for batch in loader:
@@ -65,12 +79,21 @@ def evaluate(
                 residual,
                 confidence,
                 eligible,
+                confidence_threshold=threshold,
             )
             batch_size = len(degradation)
             sample_count += batch_size
-            for key in totals:
-                totals[key] += float(getattr(losses, key)) * batch_size
-    return {key: value / max(sample_count, 1) for key, value in totals.items()}
+            eligible_count = int(eligible.sum())
+            localization_count += eligible_count
+            totals["detection"] += float(losses.detection) * batch_size
+            totals["localization"] += float(losses.localization) * eligible_count
+            totals["confidence"] += float(losses.confidence) * eligible_count
+    metrics = {
+        "detection": totals["detection"] / sample_count,
+        "localization": totals["localization"] / localization_count,
+        "confidence": totals["confidence"] / localization_count,
+    }
+    return {**metrics, "total": sum(metrics.values())}
 
 
 def main() -> None:
@@ -84,8 +107,15 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=1.0e-3)
     parser.add_argument("--weight-decay", type=float, default=1.0e-4)
+    parser.add_argument("--confidence-threshold", type=float, default=0.10)
+    parser.add_argument("--hidden-layers", type=int, choices=(1, 2), default=2)
+    parser.add_argument("--hidden-width", type=int, choices=(16, 32, 64), default=32)
+    parser.add_argument("--radial-bins", type=int, choices=(3, 4, 5), default=4)
+    parser.add_argument("--visibility-only", action="store_true", help="Omit photometric features from the detection head")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     args = parser.parse_args()
+    if not 0.0 <= args.confidence_threshold < 1.0:
+        parser.error("--confidence-threshold must lie in [0, 1)")
 
     random.seed(args.seed)
     np.random.seed(args.seed)
@@ -93,8 +123,17 @@ def main() -> None:
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(args.seed)
 
-    train = load_samples(args.train)
-    validation = load_samples(args.validation)
+    train = load_samples(args.train, args.confidence_threshold)
+    validation = load_samples(args.validation, args.confidence_threshold)
+    architecture = {
+        "degradation_dim": 11 + args.radial_bins,
+        "hidden_dim": args.hidden_width,
+        "hidden_layers": args.hidden_layers,
+        "visibility_only": args.visibility_only,
+    }
+    for samples in (train, validation):
+        if samples["degradation"].shape != (len(samples["detected"]), architecture["degradation_dim"]):
+            raise ValueError("descriptor dimensions do not match --radial-bins")
     degradation_mean = train["degradation"].mean(axis=0)
     degradation_std = np.maximum(train["degradation"].std(axis=0), 1.0e-8)
     baseline_mean = train["baseline"].mean(axis=0)
@@ -117,7 +156,7 @@ def main() -> None:
     )
 
     device = torch.device(args.device)
-    model = CalibrationNetworks().to(device)
+    model = CalibrationNetworks(**architecture).to(device)
     optimizer = torch.optim.AdamW(
         model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay
     )
@@ -140,11 +179,12 @@ def main() -> None:
                 residual,
                 confidence,
                 eligible,
+                confidence_threshold=args.confidence_threshold,
             )
             losses.total.backward()
             optimizer.step()
 
-        validation_metrics = evaluate(model, validation_loader, device)
+        validation_metrics = evaluate(model, validation_loader, device, args.confidence_threshold)
         history.append({"epoch": epoch, **validation_metrics})
         if validation_metrics["total"] < best_validation:
             best_validation = validation_metrics["total"]
@@ -153,7 +193,7 @@ def main() -> None:
             torch.save(
                 {
                     "model": model.state_dict(),
-                    "architecture": {},
+                    "architecture": architecture,
                     "degradation_mean": torch.as_tensor(degradation_mean),
                     "degradation_std": torch.as_tensor(degradation_std),
                     "baseline_mean": torch.as_tensor(baseline_mean),
@@ -162,6 +202,7 @@ def main() -> None:
                     "seed": args.seed,
                     "best_epoch": best_epoch,
                     "validation_loss": best_validation,
+                    "confidence_threshold": args.confidence_threshold,
                 },
                 args.output,
             )

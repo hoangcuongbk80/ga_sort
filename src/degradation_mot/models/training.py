@@ -6,6 +6,8 @@ import torch
 from torch import Tensor
 from torch.nn import functional as F
 
+from .confidence import tail_quadrature
+
 
 @dataclass(frozen=True)
 class CalibrationLoss:
@@ -21,7 +23,8 @@ def normalized_covariance(
 ) -> Tensor:
     lower_bound = covariance_raw.new_tensor(sigma_min)
     standard_deviation = lower_bound + F.softplus(covariance_raw[..., :4])
-    correlation = torch.tanh(covariance_raw[..., 4])
+    bound = 1.0 - torch.finfo(covariance_raw.dtype).eps
+    correlation = torch.tanh(covariance_raw[..., 4]).clamp(-bound, bound)
     covariance = torch.diag_embed(standard_deviation.square())
     cross = correlation * standard_deviation[..., 2] * standard_deviation[..., 3]
     covariance[..., 2, 3] = cross
@@ -36,6 +39,7 @@ def calibration_loss(
     confidences: Tensor,
     localization_eligible: Tensor,
     sigma_min: tuple[float, float, float, float] = (0.01, 0.01, 0.02, 0.02),
+    confidence_threshold: float = 0.10,
 ) -> CalibrationLoss:
     probability = prediction["detection_probability"]
     detection = F.binary_cross_entropy(probability, detection_labels.float())
@@ -55,13 +59,24 @@ def calibration_loss(
         alpha = prediction["confidence_alpha"][eligible]
         beta = prediction["confidence_beta"][eligible]
         confidence = confidences[eligible].clamp(1.0e-4, 1.0 - 1.0e-4)
-        confidence_nll = -(
+        log_kernel = (
             (alpha - 1.0) * torch.log(confidence)
             + (beta - 1.0) * torch.log1p(-confidence)
-            - torch.lgamma(alpha)
-            - torch.lgamma(beta)
-            + torch.lgamma(alpha + beta)
-        ).mean()
+        )
+        if confidence_threshold > 0.0:
+            # Differentiate the tail integral with respect to both beta shapes.
+            nodes, log_weights = tail_quadrature(confidence_threshold)
+            nodes = torch.as_tensor(nodes, device=alpha.device)
+            log_weights = torch.as_tensor(log_weights, device=alpha.device)
+            log_normalizer = torch.logsumexp(
+                log_weights
+                + (alpha[:, None] - 1.0) * nodes.log()
+                + (beta[:, None] - 1.0) * torch.log1p(-nodes),
+                dim=-1,
+            )
+        else:
+            log_normalizer = torch.lgamma(alpha) + torch.lgamma(beta) - torch.lgamma(alpha + beta)
+        confidence_nll = (log_normalizer - log_kernel).mean().to(alpha.dtype)
     else:
         zero = probability.sum() * 0.0
         localization = zero

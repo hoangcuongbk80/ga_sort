@@ -12,10 +12,7 @@ def _raster_bounds(
     xyxy: NDArray[np.float64], image_width: int, image_height: int
 ) -> tuple[int, int, int, int]:
     clipped = clip_xyxy(xyxy, image_width, image_height)
-    x1 = int(np.floor(clipped[0]))
-    y1 = int(np.floor(clipped[1]))
-    x2 = int(np.ceil(clipped[2]))
-    y2 = int(np.ceil(clipped[3]))
+    x1, y1, x2, y2 = np.ceil(clipped - 0.5).astype(int)
     return x1, y1, x2, y2
 
 
@@ -35,12 +32,12 @@ def extract_degradation_descriptor(
     """
     if candidate_mask.shape != value_channel.shape:
         raise ValueError("candidate_mask and value_channel must have equal shapes")
-    if radial_bins != 4:
-        raise ValueError("the manuscript configuration requires four radial bins")
+    if radial_bins <= 0:
+        raise ValueError("radial_bins must be positive")
 
     image_height, image_width = candidate_mask.shape
     x1, y1, x2, y2 = _raster_bounds(predicted_xyxy, image_width, image_height)
-    output = np.zeros(15, dtype=np.float64)
+    output = np.zeros(11 + radial_bins, dtype=np.float64)
     if x2 <= x1 or y2 <= y1:
         return output
 

@@ -47,7 +47,8 @@ def restricted_block_covariance(
     if raw.shape != (5,) or sigma_min.shape != (4,):
         raise ValueError("raw and sigma_min must have shapes (5,) and (4,)")
     sigma = sigma_min + np.logaddexp(0.0, raw[:4])
-    correlation = float(np.tanh(raw[4]))
+    bound = 1.0 - np.finfo(raw.dtype).eps
+    correlation = float(np.clip(np.tanh(raw[4]), -bound, bound))
     correlation_matrix = np.eye(4, dtype=np.float64)
     correlation_matrix[2, 3] = correlation
     correlation_matrix[3, 2] = correlation
@@ -57,7 +58,7 @@ def restricted_block_covariance(
 
 
 class ConstantObservationModel:
-    """Non-learned fallback for integration and synthetic tests."""
+    """Observation model with fixed detection probability, bias and covariance."""
 
     def __init__(
         self,
@@ -111,6 +112,7 @@ class TorchObservationModel:
         baseline_std: FloatArray,
         sigma_min: tuple[float, float, float, float] = (0.01, 0.01, 0.02, 0.02),
         device: str = "cpu",
+        confidence_threshold: float | None = None,
     ) -> None:
         try:
             import torch
@@ -124,6 +126,7 @@ class TorchObservationModel:
         self.baseline_mean = _as_numpy(baseline_mean)
         self.baseline_std = _as_numpy(baseline_std)
         self.sigma_min = np.asarray(sigma_min, dtype=np.float64)
+        self.confidence_threshold = confidence_threshold
 
     @classmethod
     def from_checkpoint(cls, path: str | Path, device: str = "cpu") -> "TorchObservationModel":
@@ -142,6 +145,7 @@ class TorchObservationModel:
             baseline_std=checkpoint["baseline_std"],
             sigma_min=tuple(checkpoint.get("sigma_min", (0.01, 0.01, 0.02, 0.02))),
             device=device,
+            confidence_threshold=checkpoint.get("confidence_threshold"),
         )
 
     def predict(

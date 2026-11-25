@@ -18,10 +18,20 @@ class Track:
     existence: float
     history_window: int
     detection_history: deque[bool] = field(init=False)
+    consecutive_hits: int = 1
+    consecutive_misses: int = 0
+    confirmed: bool = False
 
     def __post_init__(self) -> None:
         self.detection_history = deque([True], maxlen=self.history_window)
 
     def record_detection(self, observed: bool) -> None:
         self.detection_history.append(observed)
+        if observed:
+            self.consecutive_hits += 1
+            self.consecutive_misses = 0
+            self.confirmed = self.confirmed or self.consecutive_hits >= 3
+        else:
+            self.consecutive_hits = 0
+            self.consecutive_misses += 1
 
